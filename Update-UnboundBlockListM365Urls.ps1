@@ -25,15 +25,19 @@ $secret = $ApiSecret | ConvertTo-SecureString -AsPlainText
 $credential = [PSCredential]::New($ApiKey,$secret)
 
 $unboundConfig = Invoke-RestMethod -Method Get -Uri "$OPNSenseUrl/api/unbound/settings/get" -Credential $credential -Authentication Basic
-$whitelist = ($unboundConfig.unbound.dnsbl.whitelists | Get-Member).name.where({$_ -notin "Equals","GetHashCode","GetType","ToString"})
+$whitelist = ($unboundConfig.unbound.dnsbl.whitelists | Get-Member -ErrorAction SilentlyContinue).name.where({$_ -notin "Equals","GetHashCode","GetType","ToString"})
 
 $365Urls = (Invoke-RestMethod -Method Get -Uri "https://endpoints.office.com/endpoints/worldwide?clientrequestid=b10c5ed1-bad1-445f-b386-b919946339a7").urls
 
 foreach ($url in $365Urls)
 {
+    if ($url.StartsWith("*"))
+    {
+        $url = "." + $url
+    }
     if ($url -notin $whitelist)
     {
-        #create
+        
         $whitelist.Add($url)
     }
 }
