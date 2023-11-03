@@ -21,7 +21,6 @@ param (
     $OPNSenseURL
 )
 
-
 $secret = $ApiSecret | ConvertTo-SecureString -AsPlainText
 $credential = [PSCredential]::New($ApiKey,$secret)
 
@@ -36,10 +35,7 @@ foreach ($url in $365Urls)
     {
         #create
         $whitelist.Add($url)
-    }<#
-    else {
-        $url
-    }#>
+    }
 }
 
 $whitelistString = $whitelist -join ","
@@ -52,6 +48,5 @@ $unboundConfigObject = [PSCustomObject]@{
     }
 }
 $unboundConfig2 = $unboundConfigObject | ConvertTo-Json
-
 
 Invoke-RestMethod -Method Post -Uri "$OPNSenseUrl/api/unbound/settings/set" -Credential $credential -Authentication Basic -Body $unboundConfig2 -ContentType "application/json"
